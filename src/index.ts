@@ -1,4 +1,4 @@
-import Map from "./map/map.controller";
+import Map from "./map/map";
 
 (<any> global).Map = Map;
 
