@@ -1,3 +1,5 @@
+import { GPS } from "../gps/gps";
+import { StandandGPS } from "../gps/standard-gps";
 import Node from "./node";
 
 export default class NodesController {
@@ -31,13 +33,14 @@ export default class NodesController {
               if (lineData.shift() === "0") {
                 const [x, y, z, _ignore, id] = lineData;
                 nodeSet[id] = new Node(+id, +x, +y, +z, []);
-                console.log(Math.floor(nodeSet[id].y) + 3000);
               } else if(lineData.length === 3) {
                 const [from, to, _direction] = lineData;
                 nodeSet[from].next.push(nodeSet[to]);
               }
             });
           }
+          const gps: GPS = new StandandGPS();
+          console.log(gps.getShortestPathBetweenNodes(nodeSet[51], nodeSet[257]));
           resolve(nodeSet);
         }
       };
