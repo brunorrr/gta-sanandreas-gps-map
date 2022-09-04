@@ -17,15 +17,53 @@ export default class Map {
     (<any> global).ctx = this;
     this.nodeUtils = new NodeUtilsGRG();
     this.nodesController = new NodesController();
-    this.downloadBackground();
+    this.resetCanvas();
   }
 
-  private downloadBackground() {
+  highlightNode(id: number) {
+    this.resetCanvas(() => {
+      this.nodesController.getNodes().then((nodeSet: any) => {
+        
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = '#03fc56';
+        this.ctx.lineWidth = 5;
+        this.ctx.arc(
+          this.nodeUtils.convertLongitudeFromSamp(nodeSet[id].x, this.ctx.canvas.width),
+          this.nodeUtils.convertLongitudeFromSamp(nodeSet[id].x, this.ctx.canvas.width),
+          30, 0, 2 * Math.PI);
+        this.ctx.stroke();
+      });
+    });
+  }
+
+  findRoute(idOrigin: number, idDestin: number) {
+    this.resetCanvas(() => {
+      this.nodesController.getNodes().then((nodeSet: any) => {
+        const GPS = new StandandGPS();
+        const path = GPS.getShortestPathBetweenNodes(nodeSet[idOrigin], nodeSet[idDestin]);
+        this.drawCustomNodes(path, 'red');
+      })
+    });
+  }
+
+  private resetCanvas(callback: Function = undefined) {
+    this.downloadBackground(() => {
+      this.drawNodes();
+      if(callback) {
+        callback();
+      }
+    });
+  }
+
+  private downloadBackground(callback: Function = undefined) {
     const image = new Image();
     image.src = '../assets/map.jpg';
     image.onload = () => {
       this.backgroundImage = image;
       this.drawBackground();
+      if(callback) {
+        callback();
+      }
     };
   }
 
@@ -45,26 +83,21 @@ export default class Map {
       this.mapLimits.endX,
       this.mapLimits.endY
     );
-    this.drawNodes();
   }
 
   private drawNodes() {
     this.nodesController.getNodes().then((nodes: Node[]) => {
       nodes.forEach((eachNode: Node) => {
         this.ctx.fillStyle = this.nodeUtils.getColorFromAltitude(eachNode.z);
+        this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.arc(
           this.nodeUtils.convertLongitudeFromSamp(eachNode.x, this.ctx.canvas.width),
           this.nodeUtils.convertLatitudeFromSamp(eachNode.y, this.ctx.canvas.height),
           2, 0, 2 * Math.PI);
         this.ctx.fill();
-        this.drawEdges(eachNode);
+        this.drawEdges(eachNode, this.ctx.fillStyle);
       });
-    });
-    this.nodesController.getNodes().then((nodes: Node[]) => {
-      const gps: GPS = new StandandGPS();
-      const customNodes = gps.getShortestPathBetweenNodes(nodes[10], nodes[22424]);
-      this.drawCustomNodes(customNodes, '#FF0000');
     });
   }
 
@@ -80,11 +113,12 @@ export default class Map {
     });
   }
 
-  private drawEdges(node: Node) {
-    this.ctx.strokeStyle = this.nodeUtils.getColorFromAltitude(node.z);
+  private drawEdges(node: Node, color: string) {
+    this.ctx.strokeStyle = color;
 
     node.next.forEach(eachEdge => {
       this.ctx.beginPath();
+      this.ctx.lineWidth = 1;
       this.ctx.moveTo(
         this.nodeUtils.convertLongitudeFromSamp(node.x, this.ctx.canvas.width),
         this.nodeUtils.convertLatitudeFromSamp(node.y, this.ctx.canvas.height));

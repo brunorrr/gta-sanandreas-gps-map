@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    nav {
+      height: 100px;
+      padding: 10px;
+      width: 100%;
+      background: #ffd485;
+      display: flex;
+    }
+    nav ul {
+      margin: 5px 10px;
+      list-style: none;
+    }
+    nav ul li a{
+      font-size: 20px;
+      color: black;
+      text-decoration: none;
+    }
+
+    nav ul li.selected a{
+      font-weight: bold;
+    }
+
+    nav form {
+      display: none;
+    }
+
+    nav form.selected {
+      width: 100px;
+      display: block;
+    }
+  </style>
+
+  <script>
+    function setAsSelected(type) {
+      document.querySelectorAll('nav ul li').forEach((each) => each.classList.remove('selected'));
+      document.querySelectorAll('nav form').forEach((each) => each.classList.remove('selected'));
+      document.querySelectorAll('nav ul li')[type].classList.add('selected');
+      document.querySelectorAll('nav form')[type].classList.add('selected');
+    }
+  </script>
+</head>
+<body>
+  <script src="main.js"></script>
+  <nav>
+    <ul>
+      <li class="selected"><a href="javascript: setAsSelected(0); void(0);">search</a></li>
+      <li><a href="javascript: setAsSelected(1); void(0);">route</a></li>
+    </ul>
+    <form action="#" id="search" class="selected">
+      <input type="number" id="id" placeholder="Node ID" />
+      <input type="button" id="buttonSearch" value="Search" />
+    </form>
+    <form action="#" id="route">
+      <input type="number" id="from" placeholder="Node ID 1" />
+      <input type="number" id="to" placeholder="Node ID 2" />
+      <input type="button" id="buttonRoute" value="Search" />
+    </form>
+  </nav>
+  <canvas id="canvas"></canvas>
+  <script>
+    const size = Math.max(window.innerHeight, window.innerWidth) - 50;
+    document.getElementById('canvas').width = size;
+    document.getElementById('canvas').height = size;
+    const map = new Map(document.getElementById('canvas').getContext('2d'));
+
+    document.getElementById('buttonSearch').addEventListener('click', () => {
+      map.highlightNode(document.getElementById('id').value);
+    })
+
+    document.getElementById('buttonRoute').addEventListener('click', () => {
+      map.findRoute(document.getElementById('from').value, document.getElementById('to').value);
+    });
+  </script>
+</body>
+</html>
