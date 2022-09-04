@@ -2,6 +2,8 @@ import Node from "../nodes/node";
 import NodeUtilsGRG from "../utils/node-utils-grg";
 import { NodeUtils } from "../utils/node-utils.interface";
 import NodesController from "../nodes/nodes.controller";
+import { StandandGPS } from "../gps/standard-gps";
+import { GPS } from "../gps/gps";
 
 export default class Map {
 
@@ -58,6 +60,23 @@ export default class Map {
         this.ctx.fill();
         this.drawEdges(eachNode);
       });
+    });
+    this.nodesController.getNodes().then((nodes: Node[]) => {
+      const gps: GPS = new StandandGPS();
+      const customNodes = gps.getShortestPathBetweenNodes(nodes[10], nodes[22424]);
+      this.drawCustomNodes(customNodes, '#FF0000');
+    });
+  }
+
+  private drawCustomNodes(nodes: Node[], color: string) {
+    nodes.forEach((eachNode: Node) => {
+      this.ctx.fillStyle = color;
+      this.ctx.beginPath();
+      this.ctx.arc(
+        this.nodeUtils.convertLongitudeFromSamp(eachNode.x, this.ctx.canvas.width),
+        this.nodeUtils.convertLatitudeFromSamp(eachNode.y, this.ctx.canvas.height),
+        2, 0, 2 * Math.PI);
+      this.ctx.fill();
     });
   }
 

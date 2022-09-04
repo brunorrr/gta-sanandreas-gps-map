@@ -39,8 +39,7 @@ export default class NodesController {
               }
             });
           }
-          const gps: GPS = new StandandGPS();
-          console.log(gps.getShortestPathBetweenNodes(nodeSet[51], nodeSet[257]));
+          
           resolve(nodeSet);
         }
       };
